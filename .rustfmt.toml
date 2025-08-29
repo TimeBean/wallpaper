@@ -1,0 +1,67 @@
+# Rustfmt configuration file
+
+# Use verbose diffs
+print_misformatted_file_names = true
+
+# Maximum width of each line
+max_width = 100
+
+# Maximum width of the args of a function call before falling back to vertical formatting
+fn_call_width = 60
+
+# Maximum width of the args of a function-like attributes before falling back to vertical formatting
+attr_fn_like_width = 70
+
+# Maximum width in a struct literal before falling back to vertical formatting
+struct_lit_width = 18
+
+# Maximum width in a struct variant before falling back to vertical formatting
+struct_variant_width = 35
+
+# Maximum width of an array literal before falling back to vertical formatting
+array_width = 60
+
+# Maximum width of a chain to fit on a single line
+chain_width = 60
+
+# Maximum width of a single line if-else expression
+single_line_if_else_max_width = 50
+
+# Indent on expressions or items
+indent_style = "Block"
+
+# Number of spaces per tab
+tab_spaces = 4
+
+# Maximum number of blank lines which can be put between items
+blank_lines_upper_bound = 1
+
+# Maximum number of blank lines which can be put at the end of a file
+blank_lines_lower_bound = 0
+
+# Reorder import and extern crate statements alphabetically in groups (a group is separated by a newline)
+reorder_imports = true
+
+# Reorder extern crate statements alphabetically
+reorder_extern_crates = true
+
+# Controls the strategy for how consecutive imports are grouped together
+imports_granularity = "Crate"
+
+# Controls the strategy for how imports are grouped together
+group_imports = "StdExternalCrate"
+
+# Put a trailing comma after a block based match arm (non-block arms are not affected)
+match_block_trailing_comma = false
+
+# Format code in doc comments
+format_code_in_doc_comments = true
+
+# Use field init shorthand if possible
+use_field_init_shorthand = true
+
+# Use try shorthand
+use_try_shorthand = true
+
+# Replace uses of the try! macro by the ? shorthand
+edition = "2024"

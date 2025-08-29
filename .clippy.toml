@@ -1,0 +1,46 @@
+# Clippy configuration file
+
+# The maximum cognitive complexity a function can have
+cognitive-complexity-threshold = 30
+
+# The maximum number of lines a function or method can have
+too-many-lines-threshold = 100
+
+# The maximum number of arguments a function can have
+too-many-arguments-threshold = 7
+
+# The maximum number of single char bindings a scope may have
+single-char-binding-names-threshold = 4
+
+# The maximum size of a file included via `include_bytes!()` or `include_str!()`
+max-include-file-size = 1000000
+
+# The maximum number of bounds a generic type can have
+type-complexity-threshold = 250
+
+# Whether to allow mixed uninlined format args, e.g. `format!("{} {}", a, foo.bar)`
+allow-mixed-uninlined-format-args = true
+
+# List of allowed scripts for `non_ascii_idents`
+allowed-scripts = ["Latin"]
+
+# The maximum number of items a enum can have
+enum-variant-name-threshold = 3
+
+# Whether `dbg!` should be flagged
+allow-dbg-in-tests = true
+
+# Whether `expect` should be flagged
+allow-expect-in-tests = true
+
+# Whether `unwrap` should be flagged
+allow-unwrap-in-tests = true
+
+# Whether `panic` should be flagged
+allow-panic-in-tests = true
+
+# Whether `print` macros should be flagged
+allow-print-in-tests = true
+
+# Suppress lints whenever the suggested change would cause a semver breaking change
+avoid-breaking-exported-api = false
