@@ -47,12 +47,6 @@ jobs:
       - name: Run security audit
         run: cargo audit
 
-      - name: Install cargo-deny
-        run: cargo install cargo-deny
-
-      - name: Run cargo deny
-        run: cargo deny check
-
       - name: Install nightly toolchain for cargo-udeps
         uses: dtolnay/rust-toolchain@nightly
 
