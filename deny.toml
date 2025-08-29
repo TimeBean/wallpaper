@@ -1,14 +1,8 @@
 [graph]
-# If 1 or more target triples (and optionally, target_features) are specified,
-# only the specified targets will be checked when running `cargo deny check`.
 targets = []
 
 [licenses]
-# The confidence threshold for detecting a license from a license text.
 confidence-threshold = 0.8
-
-# List of explicitly allowed licenses for GPL v3 project
-# These are licenses compatible with GPL v3 and support free/open source software
 allow = [
     # GPL family - copyleft licenses
     "GPL-3.0",
@@ -44,85 +38,31 @@ allow = [
     # Other compatible licenses
     "Unicode-DFS-2016",
     "Zlib",
-    "libpng-2.0",
-    "curl",
 ]
 
-# List of explicitly disallowed licenses
-# These are proprietary, non-free, or GPL-incompatible licenses
 deny = [
-    # Non-free licenses
-    "CC-BY-NC-4.0",    # Non-commercial restriction
-    "CC-BY-ND-4.0",    # No derivatives restriction
-    "CC-BY-NC-ND-4.0", # Non-commercial + no derivatives
-
-    # GPL-incompatible copyleft
-    "GPL-1.0",  # Old GPL version
-    "EUPL-1.1", # European Union Public License (GPL incompatible)
-    "OSL-3.0",  # Open Software License (GPL incompatible)
-
-    # Problematic BSD variants
-    "BSD-4-Clause",    # Original BSD with advertising clause
-    "BSD-4-Clause-UC", # UC variant with advertising clause
-
-    # Other problematic licenses
-    "JSON",  # JSON license has "good, not evil" clause
-    "WTFPL", # While permissive, often considered unprofessional
-]
-
-# Lint level for when multiple versions of the same license are detected
-multiple-versions = "warn"
-
-# Allow specific licenses on a per-crate basis if needed
-exceptions = [
-    # Example: { allow = ["proprietary"], name = "some-crate", version = "*" },
+    "CC-BY-NC-4.0",
+    "CC-BY-ND-4.0",
+    "CC-BY-NC-ND-4.0",
+    "GPL-1.0",
+    "EUPL-1.1",
+    "OSL-3.0",
+    "BSD-4-Clause",
+    "BSD-4-Clause-UC",
+    "JSON",
 ]
 
 [bans]
-# Lint level for when multiple versions of the same crate are detected
 multiple-versions = "warn"
-# Lint level for when a crate version requirement is `*`
 wildcards = "allow"
-# The graph highlighting used when creating dotgraphs for crates with multiple versions
-highlight = "all"
-
-# List of crates that are allowed (use sparingly)
-allow = []
-
-# List of crates to deny
-deny = [
-    # Add specific crates here if needed
-    # { name = "some-bad-crate", version = "*" },
-]
-
-# Certain crates/versions that will be skipped when doing duplicate detection
-skip = []
-
-# Skip certain crates from being checked entirely
-skip-tree = []
 
 [advisories]
-# The path where the advisory database is cloned/fetched into
-db-path = "~/.cargo/advisory-db"
-# The url(s) of the advisory databases to use
+db-path = "~/.cargo/advisory-dbs"
 db-urls = ["https://github.com/rustsec/advisory-db"]
-# The lint level for security vulnerabilities
-vulnerability = "deny"
-# The lint level for unmaintained crates
-unmaintained = "warn"
-# The lint level for crates that have been yanked from their source registry
 yanked = "warn"
-# The lint level for crates with security notices
-notice = "warn"
-# A list of advisory IDs to ignore
-ignore = []
+unmaintained = "workspace"
 
 [sources]
-# Lint level for what to happen when a crate from a crate registry that is not in the allow list is encountered
 unknown-registry = "warn"
-# Lint level for what to happen when a crate from a git repository that is not in the allow list is encountered
 unknown-git = "warn"
-# List of URLs for allowed crate registries
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
-# List of URLs for allowed Git repositories
-allow-git = []
