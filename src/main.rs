@@ -15,7 +15,7 @@ struct Cli {
     #[arg(long)]
     gui: bool,
 
-    /// matugen scheme type, e.g. scheme-tonal-spot
+    /// matugen scheme type [values: scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot]
     #[arg(long = "type", value_name = "TYPE", default_value = "scheme-tonal-spot")]
     matugen_type: String,
 
