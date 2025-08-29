@@ -42,7 +42,7 @@ jobs:
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Install cargo-audit
-        run: cargo install cargo-audit
+        run: command -v cargo-audit || cargo install cargo-audit
 
       - name: Run security audit
         run: cargo audit
@@ -51,7 +51,7 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
 
       - name: Install cargo-udeps
-        run: cargo install cargo-udeps --locked
+        run: command -v cargo-udeps || cargo install cargo-udeps --locked
 
       - name: Run cargo udeps
         run: cargo +nightly udeps
