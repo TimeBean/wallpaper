@@ -1,9 +1,10 @@
 [package]
 name = "wallpaper"
-version = "0.1.0"
+version = "0.4.1"
 edition = "2024"
 
 [dependencies]
-rfd = "0.14"
-clap = { version = "4.3", features = ["derive"] }
 anyhow = "1.0"
+clap = { version = "4", features = ["derive"] }
+rfd = "0.14"   
+shellexpand = "2.1"

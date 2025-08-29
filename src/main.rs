@@ -17,7 +17,7 @@ struct Cli {
     #[arg(long)]
     gui: bool,
 
-    /// matugen scheme type
+    /// matugen scheme type [values: scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot]
     #[arg(long = "type", value_name = "TYPE", default_value = "scheme-tonal-spot")]
     matugen_type: String,
 
@@ -26,7 +26,7 @@ struct Cli {
 }
 
 fn main() -> Result<()> {
-    let version = "v0.4 - improved path handling and external command execution";
+    let version = "v0.4.1 - fix local and repo mispush";
 
     let about: &'static str = Box::leak(format!("Set wallpaper and generate palette - {}", version).into_boxed_str());
 
