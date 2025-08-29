@@ -33,7 +33,7 @@ fn main() -> Result<()> {
             .ok_or_else(|| anyhow!("No file selected via GUI"))?
     } else {
         cli.path
-            .ok_or_else(|| anyhow!("No path provided. Use --gui or supply a path."))?
+            .ok_or_else(|| anyhow!("No path provided. Supply a path."))?
     };
 
     let path = normalize_and_check_path(&raw_path)?;
