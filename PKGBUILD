@@ -11,14 +11,26 @@ makedepends=('cargo')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/heads/main.tar.gz")
 sha256sums=('4feae8a8fbbd579a9145cffd1645ef17ea5f98311a04e60b491279ae21f2107e')
 
+
 build() {
-  cd "$srcdir/$pkgname-$pkgver"
+  if [ -d "$srcdir/$pkgname-$pkgver" ]; then
+    cd "$srcdir/$pkgname-$pkgver"
+  else
+    cd "$srcdir/$pkgname-main"
+  fi
   cargo build --release --locked
 }
 
+
+
 package() {
-  cd "$srcdir/$pkgname-$pkgver"
+  if [ -d "$srcdir/$pkgname-$pkgver" ]; then
+    cd "$srcdir/$pkgname-$pkgver"
+  else
+    cd "$srcdir/$pkgname-main"
+  fi
   install -Dm755 "target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
 }
+
