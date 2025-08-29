@@ -42,7 +42,7 @@ sudo install -Dm755 target/release/wallpaper /usr/local/bin/wallpaper
 
 ---
 
-## 5. Примеры использования
+## 3. Примеры использования
 
 ### Простой запуск (CLI)
 
