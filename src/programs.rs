@@ -131,7 +131,7 @@ mod tests {
         match program {
             Program::Wallust { path: p, is_light } => {
                 assert_eq!(p.as_ref(), Path::new("/test/image.jpg"));
-                assert_eq!(is_light, true);
+                assert!(is_light);
             }
             _ => panic!("Expected Wallust variant"),
         }
