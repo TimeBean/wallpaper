@@ -9,7 +9,7 @@ license=('GPL3')
 depends=('swww' 'wallust' 'matugen')
 makedepends=('cargo')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/heads/main.tar.gz")
-sha256sums=('645f76cf7b708273f9ee0fe97f0b392cd4f1f62334ef329cf15ba63248700471')
+sha256sums=('4feae8a8fbbd579a9145cffd1645ef17ea5f98311a04e60b491279ae21f2107e')
 
 
 build() {
