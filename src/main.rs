@@ -59,7 +59,7 @@ fn main() {
         }
     };
 
-    println!("wallpaper v0.1 - {}", path);
+    println!("wallpaper {} - {}", VERSION, path);
 
     exec_swww(&path);
     exec_wal(&path, has_l);
