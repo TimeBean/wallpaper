@@ -43,34 +43,86 @@ sudo install -Dm755 target/release/wallpaper /usr/local/bin/wallpaper
 
 ---
 
-## 3. Usage examples — Simple CLI run
+## 3. Usage examples — Detailed CLI usage
+
+### Basic usage with file path
 
 ```bash
 # Set default palette and wallpaper from path/to/image.jpg
 wallpaper path/to/image.jpg
 
-# Same, but light palette
+# Same, but with light palette
 wallpaper -l path/to/image.jpg
 
-# With explicit matugen type
+# With explicit matugen scheme type
 wallpaper --type scheme-tonal-spot path/to/image.jpg
+
+# Light palette with custom scheme type
+wallpaper -l --type scheme-monochrome path/to/image.jpg
 ```
 
 ### GUI file chooser
 
 ```bash
+# Open graphical file picker (mutually exclusive with path)
 wallpaper --gui
+
+# GUI with light palette
+wallpaper -l --gui
+
+# GUI with custom scheme type
+wallpaper --gui --type scheme-expressive
+```
+
+### Available matugen scheme types
+
+- `scheme-content` (default content-based scheme)
+- `scheme-expressive` (expressive, vibrant colors)
+- `scheme-fidelity` (close to source image colors)
+- `scheme-fruit-salad` (playful, diverse colors)
+- `scheme-monochrome` (monochromatic scheme)
+- `scheme-neutral` (muted, neutral colors)
+- `scheme-rainbow` (rainbow-like colors)
+- `scheme-tonal-spot` (default, balanced tonal scheme)
+
+### Error cases and validation
+
+```bash
+# ERROR: Cannot use both --gui and path simultaneously
+wallpaper --gui /path/to/image.jpg
+# error: the argument '--gui' cannot be used with '[PATH]'
+
+# ERROR: Must provide either --gui or path
+wallpaper
+# Error: Either --gui or a path must be provided
+
+# ERROR: Path validation
+wallpaper /nonexistent/file.jpg
+# Error: Path does not exist: /nonexistent/file.jpg
 ```
 
 ### Example output
 
 ```text
-wallpaper v0.2 - /home/user/Pictures/wall.jpg
-matugen: image /home/user/Pictures/wall.jpg --type scheme-tonal-spot
-wallust: run /home/user/Pictures/wall.jpg -k --palette light
-swww: img /home/user/Pictures/wall.jpg --transition-fps 60 --transition-duration 1
+wallpaper v0.4.1 - fix local and repo mispush - /home/user/Pictures/wall.jpg
+Running: swww img /home/user/Pictures/wall.jpg --transition-type any --transition-fps 60 --transition-duration 1
+Running: matugen image /home/user/Pictures/wall.jpg --type scheme-tonal-spot
+Running: wallust run /home/user/Pictures/wall.jpg -k
+[I] image: wall.jpg
+[I] image parser: Using FastResize backend parser
+[I] threshold: Not defined, using best default thresholds.
+[I] colorspace: Using Lch colorspace variation
+[I] scheme palette: Using Dark palette
+[I] contrast: Doing extra calculations to ensure a good contrast
+[I] sequences: Setting terminal colors.
+[I] templates: Writing templates..
+[I] cache: Saving scheme to cache.
+
+E N J O Y   T H E   P A L E T T E !
 Done.
 ```
+
+---
 
 # wallpaper — автоматизация установки обоев и генерации палитры
 
@@ -100,7 +152,7 @@ Done.
 ```bash
 git clone git@github.com:TimeBean/wallpaper.git
 
-или
+# или
 
 git clone https://github.com/TimeBean/wallpaper.git
 
@@ -117,34 +169,83 @@ sudo install -Dm755 target/release/wallpaper /usr/local/bin/wallpaper
 
 ---
 
-## 3. Примеры использования — Простой запуск (CLI)
+## 3. Примеры использования — Подробное использование CLI
+
+### Основное использование с путем к файлу
 
 ```bash
 # Установит палитру по умолчанию и обои из path/to/image.jpg
 wallpaper path/to/image.jpg
 
-# То же, но светлая палитра
+# То же, но со светлой палитрой
 wallpaper -l path/to/image.jpg
 
-# С явным типом matugen
+# С явным типом схемы matugen
 wallpaper --type scheme-tonal-spot path/to/image.jpg
+
+# Светлая палитра с пользовательским типом схемы
+wallpaper -l --type scheme-monochrome path/to/image.jpg
 ```
 
 ### Запуск с GUI для выбора файла
 
 ```bash
+# Открыть графический выборщик файлов (взаимоисключающе с путем)
 wallpaper --gui
+
+# GUI со светлой палитрой
+wallpaper -l --gui
+
+# GUI с пользовательским типом схемы
+wallpaper --gui --type scheme-expressive
+```
+
+### Доступные типы схем matugen
+
+- `scheme-content` (схема по содержанию по умолчанию)
+- `scheme-expressive` (выразительные, яркие цвета)
+- `scheme-fidelity` (близкие к исходным цветам изображения)
+- `scheme-fruit-salad` (игривые, разнообразные цвета)
+- `scheme-monochrome` (монохромная схема)
+- `scheme-neutral` (приглушенные, нейтральные цвета)
+- `scheme-rainbow` (радужные цвета)
+- `scheme-tonal-spot` (по умолчанию, сбалансированная тональная схема)
+
+### Случаи ошибок и валидация
+
+```bash
+# ОШИБКА: Нельзя использовать --gui и путь одновременно
+wallpaper --gui /path/to/image.jpg
+# error: the argument '--gui' cannot be used with '[PATH]'
+
+# ОШИБКА: Необходимо указать либо --gui, либо путь
+wallpaper
+# Error: Either --gui or a path must be provided
+
+# ОШИБКА: Валидация пути
+wallpaper /nonexistent/file.jpg
+# Error: Path does not exist: /nonexistent/file.jpg
 ```
 
 ### Пример вывода
 
 ```text
-wallpaper v0.2 - /home/user/Pictures/wall.jpg
-matugen: image /home/user/Pictures/wall.jpg --type scheme-tonal-spot
-wallust: run /home/user/Pictures/wall.jpg -k --palette light
-swww: img /home/user/Pictures/wall.jpg --transition-fps 60 --transition-duration 1
+wallpaper v0.4.1 - fix local and repo mispush - /home/user/Pictures/wall.jpg
+Running: swww img /home/user/Pictures/wall.jpg --transition-type any --transition-fps 60 --transition-duration 1
+Running: matugen image /home/user/Pictures/wall.jpg --type scheme-tonal-spot
+Running: wallust run /home/user/Pictures/wall.jpg -k
+[I] image: wall.jpg
+[I] image parser: Using FastResize backend parser
+[I] threshold: Not defined, using best default thresholds.
+[I] colorspace: Using Lch colorspace variation
+[I] scheme palette: Using Dark palette
+[I] contrast: Doing extra calculations to ensure a good contrast
+[I] sequences: Setting terminal colors.
+[I] templates: Writing templates..
+[I] cache: Saving scheme to cache.
+
+E N J O Y   T H E   P A L E T T E !
 Done.
 ```
 
 ---
-
