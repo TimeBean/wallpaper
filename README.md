@@ -64,7 +64,12 @@
 ### Собрать из исходников
 
 ```bash
-git clone <репозиторий>
+git clone git@github.com:TimeBean/wallpaper.git
+
+или
+
+https://github.com/TimeBean/wallpaper.git
+
 cd wallpaper
 cargo build --release
 # бинарник окажется в target/release/wallpaper
