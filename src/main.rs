@@ -1,123 +1,110 @@
-use std::env;
-use std::process::Command;
+use anyhow::{anyhow, Context, Result};
+use clap::Parser;
+use std::{path::PathBuf, process::Command};
 
-const VERSION: &str = "v0.2 - file dialog update";
+const VERSION: &str = "v0.3 - code base + order update";
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
+#[derive(Parser, Debug)]
+#[command(name = "wallpaper", version = VERSION, about = "Set wallpaper and generate palette")]
+struct Cli {
+    /// Use light palette mode
+    #[arg(short = 'l', long)]
+    light: bool,
 
-    if args.iter().any(|a| a == "--help" || a == "-h") {
-        println!("wallpaper {}\n", VERSION);
-        println!("Usage:");
-        println!(" wallpaper [OPTIONS] <path>");
-        println!(" wallpaper [OPTIONS] --gui");
-        println!("");
-        println!("Options:");
-        println!(" -h, --help Show this help message");
-        println!(" -v, --version Show version");
-        println!(" --gui Open graphical file chooser to pick an image (uses rfd)");
-        println!(" -l Use light palette mode for wallust/wal");
-        println!(" --type <scheme-...> Specify matugen color scheme, e.g. --type scheme-tonal-spot");
-        println!("Examples:");
-        println!(" wallpaper /path/to/image.jpg");
-        println!(" wallpaper -l --type scheme-tonal-spot /path/to/image.jpg");
-        println!(" wallpaper --gui");
-        std::process::exit(0);
-    }
+    /// Open graphical file chooser
+    #[arg(long)]
+    gui: bool,
 
-    if args.iter().any(|a| a == "--version" || a == "-v") {
-        println!("{}", VERSION);
-        std::process::exit(0);
-    }
+    /// matugen scheme type, e.g. scheme-tonal-spot
+    #[arg(long = "type", value_name = "TYPE", default_value = "scheme-tonal-spot")]
+    matugen_type: String,
 
-    let has_gui = args.iter().any(|a| a == "--gui");
-    let has_l = args.iter().any(|a| a == "-l");
+    /// Path to image (ignored if --gui is used)
+    path: Option<PathBuf>,
+}
 
-    let mut matugen_type = "scheme-tonal-spot".to_string();
-    if let Some(scheme_arg) = args.iter().find(|w| w.contains("scheme")) {
-        println!("Matugen will use {} color scheme.", scheme_arg);
-        matugen_type = scheme_arg.clone();
-    }
+fn main() -> Result<()> {
+    let cli = Cli::parse();
 
-    let path: String = if has_gui {
-        if let Some(pathbuf) = rfd::FileDialog::new()
+    let path_buf = if cli.gui {
+        rfd::FileDialog::new()
             .set_title("Choose wallpaper")
             .pick_file()
-        {
-            pathbuf.to_string_lossy().to_string()
-        } else {
-            eprintln!("No file selected. Choose a wallpaper (без негатива).");
-            std::process::exit(1);
-        }
+            .ok_or_else(|| anyhow!("No file selected via GUI"))?
     } else {
-        match args.iter().skip(1).find(|a| !a.starts_with('-')) {
-            Some(p) => p.clone(),
-            None => {
-                eprintln!("Usage: {} <path> [-l] [--type scheme-<type>] [--gui]", args[0]);
-                std::process::exit(1);
-            }
-        }
+        cli.path
+            .ok_or_else(|| anyhow!("No path provided. Use --gui or supply a path."))?
     };
 
-    println!("wallpaper {} - {}", VERSION, path);
+    println!("wallpaper {} - {}", VERSION, path_buf.display());
 
-    exec_swww(&path);
-    exec_wal(&path, has_l);
-    exec_matugen(&path, &matugen_type);
+    exec_swww(&path_buf)?;
+    exec_matugen(&path_buf, &cli.matugen_type)?;
+    exec_wal(&path_buf, cli.light)?;
 
     println!("Done.");
+    Ok(())
 }
 
-fn exec_matugen(path: &str, matugen_type: &str) {
-    let mut matugen_cmd = Command::new("matugen");
-
-    matugen_cmd.arg("image").arg(path).arg("--type").arg(matugen_type);
-
-    let matugen = matugen_cmd
+fn run_cmd_and_log(cmd: &mut Command) -> Result<()> {
+    let output = cmd
         .output()
-        .expect("matugen command failed to start");
+        .with_context(|| format!("failed to spawn command {:?}", cmd))?;
 
-    println!(
-        "\n{}\n{}",
-        String::from_utf8_lossy(&matugen.stdout),
-        String::from_utf8_lossy(&matugen.stderr)
-    );
-}
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
 
-fn exec_wal(path: &str, is_light: bool) {
-    let mut wal_cmd = Command::new("wallust");
-    wal_cmd.arg("run").arg(path).arg("-k");
-    if is_light {
-        wal_cmd.arg("--palette").arg("light");
+    if !stdout.is_empty() {
+        println!("{}", stdout);
+    }
+    if !stderr.is_empty() {
+        eprintln!("{}", stderr);
     }
 
-    let wal = wal_cmd
-        .output()
-        .expect("wal command failed to start");
-
-    println!(
-        "\n{}\n{}",
-        String::from_utf8_lossy(&wal.stdout),
-        String::from_utf8_lossy(&wal.stderr)
-    );
+    if !output.status.success() {
+        return Err(anyhow!(
+            "Command {:?} exited with code: {}",
+            cmd,
+            output
+                .status
+                .code()
+                .map(|c| c.to_string())
+                .unwrap_or_else(|| "unknown".into())
+        ));
+    }
+    Ok(())
 }
 
-fn exec_swww(path: &str) {
-    let swww = Command::new("swww")
-        .arg("img")
+fn exec_matugen(path: &PathBuf, matugen_type: &str) -> Result<()> {
+    let mut cmd = Command::new("matugen");
+    cmd.arg("image")
+        .arg(path)
+        .arg("--type")
+        .arg(matugen_type);
+
+    run_cmd_and_log(&mut cmd)
+}
+
+fn exec_wal(path: &PathBuf, is_light: bool) -> Result<()> {
+    let mut cmd = Command::new("wallust");
+    cmd.arg("run").arg(path).arg("-k");
+    if is_light {
+        cmd.arg("--palette").arg("light");
+    }
+
+    run_cmd_and_log(&mut cmd)
+}
+
+fn exec_swww(path: &PathBuf) -> Result<()> {
+    let mut cmd = Command::new("swww");
+    cmd.arg("img")
         .arg(path)
         .arg("--transition-type")
         .arg("any")
         .arg("--transition-fps")
         .arg("60")
         .arg("--transition-duration")
-        .arg("1")
-        .output()
-        .expect("swww command failed to start");
+        .arg("1");
 
-    println!(
-        "\n{}\n{}",
-        String::from_utf8_lossy(&swww.stdout),
-        String::from_utf8_lossy(&swww.stderr)
-    );
+    run_cmd_and_log(&mut cmd)
 }
