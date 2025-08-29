@@ -1,7 +1,3 @@
-# Начало реадми
-
-1. Английский
-
 # wallpaper — automation for setting wallpapers and generating palettes
 
 ---
@@ -75,10 +71,6 @@ wallust: run /home/user/Pictures/wall.jpg -k --palette light
 swww: img /home/user/Pictures/wall.jpg --transition-fps 60 --transition-duration 1
 Done.
 ```
-
----
-
-2. Русский
 
 # wallpaper — автоматизация установки обоев и генерации палитры
 
