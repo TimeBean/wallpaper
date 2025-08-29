@@ -27,7 +27,7 @@ git clone git@github.com:TimeBean/wallpaper.git
 
 или
 
-https://github.com/TimeBean/wallpaper.git
+git clone https://github.com/TimeBean/wallpaper.git
 
 cd wallpaper
 cargo build --release
