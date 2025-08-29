@@ -1,11 +1,13 @@
 use anyhow::{anyhow, Context, Result};
-use clap::Parser;
-use std::{path::PathBuf, process::Command};
-
-const VERSION: &str = "v0.3 - code base + order update";
+use clap::{CommandFactory, FromArgMatches, Parser};
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 #[derive(Parser, Debug)]
-#[command(name = "wallpaper", version = VERSION, about = "Set wallpaper and generate palette")]
+#[command(name = "wallpaper")]
 struct Cli {
     /// Use light palette mode
     #[arg(short = 'l', long)]
@@ -15,7 +17,7 @@ struct Cli {
     #[arg(long)]
     gui: bool,
 
-    /// matugen scheme type [values: scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot]
+    /// matugen scheme type
     #[arg(long = "type", value_name = "TYPE", default_value = "scheme-tonal-spot")]
     matugen_type: String,
 
@@ -24,9 +26,17 @@ struct Cli {
 }
 
 fn main() -> Result<()> {
-    let cli = Cli::parse();
+    let version = "v0.4 - improved path handling and external command execution";
 
-    let path_buf = if cli.gui {
+    let about: &'static str = Box::leak(format!("Set wallpaper and generate palette - {}", version).into_boxed_str());
+
+    let mut cmd = Cli::command();
+    cmd = cmd.version(version).about(about);
+
+    let matches = cmd.get_matches();
+    let cli = Cli::from_arg_matches(&matches).map_err(|e| anyhow!(e.to_string()))?;
+
+    let raw_path = if cli.gui {
         rfd::FileDialog::new()
             .set_title("Choose wallpaper")
             .pick_file()
@@ -36,26 +46,56 @@ fn main() -> Result<()> {
             .ok_or_else(|| anyhow!("No path provided. Use --gui or supply a path."))?
     };
 
-    println!("wallpaper {} - {}", VERSION, path_buf.display());
+    let path = normalize_and_check_path(&raw_path)?;
 
-    exec_swww(&path_buf)?;
-    exec_matugen(&path_buf, &cli.matugen_type)?;
-    exec_wal(&path_buf, cli.light)?;
+    println!("wallpaper {} - {}", version, path.display());
+
+    exec_swww(&path)?;
+    exec_matugen(&path, &cli.matugen_type)?;
+    exec_wal(&path, cli.light)?;
 
     println!("Done.");
     Ok(())
 }
 
-fn run_cmd_and_log(cmd: &mut Command) -> Result<()> {
+fn normalize_and_check_path(original: &Path) -> Result<PathBuf> {
+    let expanded = {
+        let s = original.to_string_lossy();
+        shellexpand::tilde(&s).into_owned()
+    };
+
+    let pb = PathBuf::from(expanded);
+
+    if !pb.exists() {
+        return Err(anyhow!("Path does not exist: {}", pb.display()));
+    }
+    if !pb.is_file() {
+        return Err(anyhow!("Path is not a file: {}", pb.display()));
+    }
+
+    let canonical = pb
+        .canonicalize()
+        .with_context(|| format!("Failed to canonicalize path: {}", pb.display()))?;
+
+    Ok(canonical)
+}
+
+fn run_program(program: &str, args: &[OsString]) -> Result<()> {
+    let args_display: Vec<String> = args.iter().map(|a| a.to_string_lossy().into_owned()).collect();
+    println!("Running: {} {}", program, args_display.join(" "));
+
+    let mut cmd = Command::new(program);
+    cmd.args(args);
+
     let output = cmd
         .output()
-        .with_context(|| format!("failed to spawn command {:?}", cmd))?;
+        .with_context(|| format!("Failed to spawn command `{}` (is it installed and in PATH?)", program))?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
     if !stdout.is_empty() {
-        println!("{}", stdout);
+        print!("{}", stdout);
     }
     if !stderr.is_empty() {
         eprintln!("{}", stderr);
@@ -63,48 +103,47 @@ fn run_cmd_and_log(cmd: &mut Command) -> Result<()> {
 
     if !output.status.success() {
         return Err(anyhow!(
-            "Command {:?} exited with code: {}",
-            cmd,
-            output
-                .status
-                .code()
-                .map(|c| c.to_string())
-                .unwrap_or_else(|| "unknown".into())
+            "Command `{}` exited with status: {}",
+            program,
+            output.status
         ));
     }
+
     Ok(())
 }
 
-fn exec_matugen(path: &PathBuf, matugen_type: &str) -> Result<()> {
-    let mut cmd = Command::new("matugen");
-    cmd.arg("image")
-        .arg(path)
-        .arg("--type")
-        .arg(matugen_type);
+fn exec_matugen(path: &Path, matugen_type: &str) -> Result<()> {
+    let args: Vec<OsString> = vec![
+        OsString::from("image"),
+        path.as_os_str().to_os_string(),
+        OsString::from("--type"),
+        OsString::from(matugen_type),
+    ];
 
-    run_cmd_and_log(&mut cmd)
+    run_program("matugen", &args)
 }
 
-fn exec_wal(path: &PathBuf, is_light: bool) -> Result<()> {
-    let mut cmd = Command::new("wallust");
-    cmd.arg("run").arg(path).arg("-k");
+fn exec_wal(path: &Path, is_light: bool) -> Result<()> {
+    let mut args: Vec<OsString> = vec![OsString::from("run"), path.as_os_str().to_os_string(), OsString::from("-k")];
     if is_light {
-        cmd.arg("--palette").arg("light");
+        args.push(OsString::from("--palette"));
+        args.push(OsString::from("light"));
     }
 
-    run_cmd_and_log(&mut cmd)
+    run_program("wallust", &args)
 }
 
-fn exec_swww(path: &PathBuf) -> Result<()> {
-    let mut cmd = Command::new("swww");
-    cmd.arg("img")
-        .arg(path)
-        .arg("--transition-type")
-        .arg("any")
-        .arg("--transition-fps")
-        .arg("60")
-        .arg("--transition-duration")
-        .arg("1");
+fn exec_swww(path: &Path) -> Result<()> {
+    let args: Vec<OsString> = vec![
+        OsString::from("img"),
+        path.as_os_str().to_os_string(),
+        OsString::from("--transition-type"),
+        OsString::from("any"),
+        OsString::from("--transition-fps"),
+        OsString::from("60"),
+        OsString::from("--transition-duration"),
+        OsString::from("1"),
+    ];
 
-    run_cmd_and_log(&mut cmd)
+    run_program("swww", &args)
 }
