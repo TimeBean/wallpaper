@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::{ffi::OsString, path::Path};
 
-use crate::utils::run_program;
+use crate::utils::run_program_with_dry_run;
 
 #[derive(Debug)]
 pub enum Program {
@@ -82,23 +82,43 @@ impl Program {
         }
     }
 
+    #[allow(dead_code)]
     pub fn execute(&self) -> Result<()> {
+        self.execute_with_dry_run(false)
+    }
+
+    pub fn execute_with_dry_run(&self, dry_run: bool) -> Result<()> {
         let program_name = self.get_program_name();
         let args = self.get_args();
-        run_program(program_name, &args)
+        run_program_with_dry_run(program_name, &args, dry_run)
     }
 }
 
+#[allow(dead_code)]
 pub fn exec_matugen(path: &Path, matugen_type: &str) -> Result<()> {
-    Program::matugen(path, matugen_type).execute()
+    exec_matugen_with_dry_run(path, matugen_type, false)
 }
 
+pub fn exec_matugen_with_dry_run(path: &Path, matugen_type: &str, dry_run: bool) -> Result<()> {
+    Program::matugen(path, matugen_type).execute_with_dry_run(dry_run)
+}
+
+#[allow(dead_code)]
 pub fn exec_wal(path: &Path, is_light: bool) -> Result<()> {
-    Program::wallust(path, is_light).execute()
+    exec_wal_with_dry_run(path, is_light, false)
 }
 
+pub fn exec_wal_with_dry_run(path: &Path, is_light: bool, dry_run: bool) -> Result<()> {
+    Program::wallust(path, is_light).execute_with_dry_run(dry_run)
+}
+
+#[allow(dead_code)]
 pub fn exec_swww(path: &Path) -> Result<()> {
-    Program::swww(path).execute()
+    exec_swww_with_dry_run(path, false)
+}
+
+pub fn exec_swww_with_dry_run(path: &Path, dry_run: bool) -> Result<()> {
+    Program::swww(path).execute_with_dry_run(dry_run)
 }
 
 #[cfg(test)]

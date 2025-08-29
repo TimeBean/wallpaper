@@ -27,11 +27,26 @@ pub fn normalize_and_check_path(original: &Path) -> Result<PathBuf> {
     Ok(canonical)
 }
 
+#[allow(dead_code)]
 pub fn run_program(program: &str, args: &[OsString]) -> Result<()> {
+    run_program_with_dry_run(program, args, false)
+}
+
+pub fn run_program_with_dry_run(program: &str, args: &[OsString], dry_run: bool) -> Result<()> {
     let args_display: Vec<String> = args
         .iter()
         .map(|a| a.to_string_lossy().into_owned())
         .collect();
+
+    if dry_run {
+        println!(
+            "[DRY RUN] Would run: {} {}",
+            program,
+            args_display.join(" ")
+        );
+        return Ok(());
+    }
+
     println!("Running: {} {}", program, args_display.join(" "));
 
     let mut cmd = Command::new(program);
