@@ -1,7 +1,5 @@
-[graph]
-targets = []
-
 [licenses]
+version = 2
 confidence-threshold = 0.8
 allow = [
     # GPL family - copyleft licenses
@@ -38,18 +36,6 @@ allow = [
     # Other compatible licenses
     "Unicode-DFS-2016",
     "Zlib",
-]
-
-deny = [
-    "CC-BY-NC-4.0",
-    "CC-BY-ND-4.0",
-    "CC-BY-NC-ND-4.0",
-    "GPL-1.0",
-    "EUPL-1.1",
-    "OSL-3.0",
-    "BSD-4-Clause",
-    "BSD-4-Clause-UC",
-    "JSON",
 ]
 
 [bans]
