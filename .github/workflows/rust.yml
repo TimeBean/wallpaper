@@ -14,6 +14,11 @@ jobs:
     name: Check and Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libwayland-dev jq
+
       - name: Checkout sources
         uses: actions/checkout@v4
 
@@ -66,6 +71,11 @@ jobs:
           - beta
           - nightly
     steps:
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libwayland-dev jq
+
       - name: Checkout sources
         uses: actions/checkout@v4
 
@@ -98,6 +108,11 @@ jobs:
     needs: [check, test]
     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     steps:
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libwayland-dev jq
+
       - name: Checkout sources
         uses: actions/checkout@v4
 
@@ -122,28 +137,34 @@ jobs:
       - name: Build release binary
         run: cargo build --release --verbose
 
+      - name: Get binary name
+        id: bin
+        run: |
+          BIN_NAME=$(cargo metadata --format-version=1 --no-deps | jq -r '.packages[0].name')
+          echo "bin_name=$BIN_NAME" >> $GITHUB_OUTPUT
+
       - name: Strip binary
-        run: strip target/release/wallpaper
+        run: strip target/release/${{ steps.bin.outputs.bin_name }}
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wallpaper-linux-x86_64
-          path: target/release/wallpaper
+          name: ${{ steps.bin.outputs.bin_name }}-linux-x86_64
+          path: target/release/${{ steps.bin.outputs.bin_name }}
           retention-days: 90
 
       - name: Create release archive
         run: |
           mkdir -p dist
-          cp target/release/wallpaper dist/
-          cp README.md dist/
-          cp LICENSE dist/
+          cp target/release/${{ steps.bin.outputs.bin_name }} dist/
+          cp README.md dist/ || true
+          cp LICENSE dist/ || true
           cd dist
-          tar -czf ../wallpaper-linux-x86_64.tar.gz *
+          tar -czf ../${{ steps.bin.outputs.bin_name }}-linux-x86_64.tar.gz *
 
       - name: Upload release archive
         uses: actions/upload-artifact@v4
         with:
-          name: wallpaper-linux-x86_64-archive
-          path: wallpaper-linux-x86_64.tar.gz
+          name: ${{ steps.bin.outputs.bin_name }}-linux-x86_64-archive
+          path: ${{ steps.bin.outputs.bin_name }}-linux-x86_64.tar.gz
           retention-days: 90
